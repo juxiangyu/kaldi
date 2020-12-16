@@ -135,6 +135,7 @@ int32 DecodableNnetSimpleLooped::GetIvectorDim() const {
 
 
 void DecodableNnetSimpleLooped::AdvanceChunk() {
+  std::ofstream chunk_output("chunk_result.txt", std::ios::app);
   int32 begin_input_frame, end_input_frame;
   if (num_chunks_computed_ == 0) {
     begin_input_frame = -info_.frames_left_context;
@@ -145,6 +146,7 @@ void DecodableNnetSimpleLooped::AdvanceChunk() {
         info_.frames_right_context;
     end_input_frame = begin_input_frame + info_.frames_per_chunk;
   }
+  chunk_output << "chunk id: " << num_chunks_computed_ << std::endl;
   CuMatrix<BaseFloat> feats_chunk(end_input_frame - begin_input_frame,
                                   feats_.NumCols(), kUndefined);
 
@@ -166,6 +168,16 @@ void DecodableNnetSimpleLooped::AdvanceChunk() {
           feats_.Row(input_frame));
     }
     feats_chunk.CopyFromMat(this_feats);
+  }
+
+  chunk_output << "chunk input " << "[" << feats_chunk.NumRows() << ", " << feats_chunk.NumCols() << "]: " << std::endl;
+//  chunk_output_ << feats_chunk << std::endl;
+  for (int i = 0; i < feats_chunk.NumRows(); ++i) {
+    chunk_output << "frame " << i << ": ";
+    for (int j = 0; j < feats_chunk.NumCols(); ++j) {
+      chunk_output << feats_chunk(i, j) << " ";
+    }
+    chunk_output << std::endl;
   }
   computer_.AcceptInput("input", &feats_chunk);
 
@@ -200,6 +212,15 @@ void DecodableNnetSimpleLooped::AdvanceChunk() {
     // happen in practice.
     CuMatrix<BaseFloat> output;
     computer_.GetOutputDestructive("output", &output);
+    chunk_output << "chunk output: " << "[" << output.NumRows() << ", " << output.NumCols() << "]: " << std::endl;
+    for (int i = 0; i < output.NumRows(); ++i) {
+      chunk_output << "frame " << i << ": ";
+      for (int j = 0; j < output.NumCols(); ++j) {
+        chunk_output << output(i, j) << " ";
+      }
+      chunk_output << std::endl;
+    }
+    chunk_output << output << std::endl;
 
     if (info_.log_priors.Dim() != 0) {
       // subtract log-prior (divide by prior)

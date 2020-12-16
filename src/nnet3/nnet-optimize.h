@@ -54,9 +54,9 @@ struct NnetOptimizeOptions {
   int32 max_deriv_time_relative;
   bool snip_row_ops;
   int32 memory_compression_level;
-  // optimize_looped_computation is a 'hidden config' not available from
-  // the command line; it's set to true to enable the optimization for
-  // looped computation that turns a linear computation into a loop.
+  //  // optimize_looped_computation is a 'hidden config' not available from
+  //  // the command line; it's set to true to enable the optimization for
+  //  // looped computation that turns a linear computation into a loop.
   bool optimize_looped_computation;
 
   NnetOptimizeOptions():
